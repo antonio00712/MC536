@@ -97,55 +97,48 @@ ORDER BY fontes_agua DESC;
 
 -- 2. Consultar escolas com internet apenas para administrativo    
 SELECT 
-  e.no_entidade,
-  r.sg_uf
-FROM internet i
-JOIN escolas e ON e.co_entidade = i.co_entidade
-JOIN regiao_escolar r ON r.id_regiao = e.regiao_id
+  no_entidade,
+  SG_UF
+FROM escolas
 WHERE 
-  i.in_internet_administrativo = TRUE AND
-  (i.in_internet_alunos = FALSE OR i.in_internet_alunos IS NULL);
+  IN_INTERNET_ADMINISTRATIVO = TRUE AND
+  (IN_INTERNET_ALUNOS = FALSE OR IN_INTERNET_ALUNOS IS NULL);
+
 
 -- 3. melhores rendimentos no enem por escola
 SELECT 
-  re.co_escola_educacenso,
-  e.no_entidade,
-  re.nu_ano,
-  re.nu_taxa_participacao,
-  re.nu_media_tot
-FROM rendimento_enem re
-JOIN escolas e ON e.co_entidade = re.co_escola_educacenso
-WHERE re.nu_media_tot IS NOT NULL
-ORDER BY re.nu_media_tot DESC, re.nu_ano
+  co_entidade,
+  no_entidade,
+  NU_ANO,
+  NU_TAXA_PARTICIPACAO,
+  NU_MEDIA_TOT
+FROM escolas
+WHERE NU_MEDIA_TOT IS NOT NULL
+ORDER BY NU_MEDIA_TOT DESC, NU_ANO
 LIMIT 20;
+
 
 -- 4. escolas com todas as dependências presentes
 SELECT 
-  e.no_entidade,
-  r.sg_uf
-FROM escolas e
-JOIN regiao_escolar r ON r.id_regiao = e.regiao_id
-JOIN agua a ON a.co_entidade = e.co_entidade
-JOIN energia en ON en.co_entidade = e.co_entidade
-JOIN esgoto es ON es.co_entidade = e.co_entidade
-JOIN internet i ON i.co_entidade = e.co_entidade
-JOIN dependencias d ON d.co_entidade = e.co_entidade
+  no_entidade,
+  SG_UF
+FROM escolas
 WHERE 
-  a.in_agua_rede_publica = TRUE AND
-  en.in_energia_rede_publica = TRUE AND
-  es.in_esgoto_rede_publica = TRUE AND
-  i.in_internet = TRUE AND
-  d.in_biblioteca = TRUE AND
-  d.in_banheiro = TRUE AND
-  d.in_laboratorio_informatica = TRUE;
+  IN_AGUA_REDE_PUBLICA = TRUE AND
+  IN_ENERGIA_REDE_PUBLICA = TRUE AND
+  IN_ESGOTO_REDE_PUBLICA = TRUE AND
+  IN_INTERNET = TRUE AND
+  IN_BIBLIOTECA = TRUE AND
+  IN_BANHEIRO = TRUE AND
+  IN_LABORATORIO_INFORMATICA = TRUE;
+
 
 -- 5. Relação rendimento e dependencia e localização da escola
 SELECT 
-  e.tp_dependencia,
+  tp_dependencia,
   COUNT(*) AS qtd_escolas,
-  ROUND(AVG(r.ensino_medio), 2) AS media_ensino_medio
-FROM rendimento r
-JOIN escolas e ON e.co_entidade = r.co_entidade
-WHERE r.ensino_medio IS NOT NULL
-GROUP BY e.tp_dependencia
+  ROUND(AVG(ENSINO_MEDIO), 2) AS media_ensino_medio
+FROM escolas
+WHERE ENSINO_MEDIO IS NOT NULL
+GROUP BY tp_dependencia
 ORDER BY media_ensino_medio DESC;

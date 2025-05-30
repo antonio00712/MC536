@@ -77,24 +77,22 @@ INSERT INTO ano(NU_ANO_CENSO) VALUES (2023);
 
 -- 1. Consultar escolas com mais de uma fonte de água
 SELECT 
-  e.no_entidade,
-  COUNT(*) FILTER (WHERE a.in_agua_rede_publica) +
-  COUNT(*) FILTER (WHERE a.in_agua_poco_artesiano) +
-  COUNT(*) FILTER (WHERE a.in_agua_cacimba) +
-  COUNT(*) FILTER (WHERE a.in_agua_fonte_rio) AS fontes_agua
-FROM escolas e
-JOIN agua a ON e.co_entidade = a.co_entidade
+  no_entidade,
+  (CAST(IN_AGUA_REDE_PUBLICA AS INT) +
+   CAST(IN_AGUA_POCO_ARTESIANO AS INT) +
+   CAST(IN_AGUA_CACIMBA AS INT) +
+   CAST(IN_AGUA_FONTE_RIO AS INT)) AS fontes_agua
+FROM escolas
 WHERE 
-  a.in_agua_rede_publica OR 
-  a.in_agua_poco_artesiano OR 
-  a.in_agua_cacimba OR 
-  a.in_agua_fonte_rio
-GROUP BY e.no_entidade
+  COALESCE(IN_AGUA_REDE_PUBLICA, FALSE) OR 
+  COALESCE(IN_AGUA_POCO_ARTESIANO, FALSE) OR 
+  COALESCE(IN_AGUA_CACIMBA, FALSE) OR 
+  COALESCE(IN_AGUA_FONTE_RIO, FALSE)
 HAVING 
-  COUNT(*) FILTER (WHERE a.in_agua_rede_publica) +
-  COUNT(*) FILTER (WHERE a.in_agua_poco_artesiano) +
-  COUNT(*) FILTER (WHERE a.in_agua_cacimba) +
-  COUNT(*) FILTER (WHERE a.in_agua_fonte_rio) > 1
+  (CAST(IN_AGUA_REDE_PUBLICA AS INT) +
+   CAST(IN_AGUA_POCO_ARTESIANO AS INT) +
+   CAST(IN_AGUA_CACIMBA AS INT) +
+   CAST(IN_AGUA_FONTE_RIO AS INT)) > 1
 ORDER BY fontes_agua DESC;
 
 -- 2. Consultar escolas com internet apenas para administrativo    

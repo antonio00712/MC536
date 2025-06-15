@@ -9,7 +9,7 @@ Este projeto se relaciona com a ODS 4 – Educação de qualidade, especialmente
 Você foi contratado para reformular um sistema de consulta a dados altamente estruturados. As principais operações consistem em realizar análises estatísticas sobre grandes volumes de dados históricos e imutáveis. As consultas acessam frequentemente um número pequeno de atributos, mas um número grande de registros. O sistema é utilizado por analistas de dados que preferem uma integração direta com linguagens como Python ou R.
 
 ## 🦆 Por que utilizar o DuckDB?
-O DuckDB utiliza um modelo colunar para armazenamento de dados, o que oferece benefícios significativos para esse cenário, como eficiência de leitura e compressão. Ele é compatível com SQL padrão, o que facilita a migração das consultas já desenvolvidas no Projeto 1, e possui integração com Python e R. Além disso, o nosso modelo do Projeto 1 pode ser facilmente desnormalizado sem afetar as nossas consultas.
+O DuckDB é a melhor escolha para o cenário A porque usa um modelo de armazenamento colunar, que garante leitura rápida e boa compressão, ideal para trabalhar com muitos dados históricos e poucas atualizações. Ele é compatível com SQL, o que facilita o reaproveitamento das consultas do Projeto 1, e se integra muito bem com Python e R. Como o foco é leitura, o modelo pode ser desnormalizado sem prejuízo, ganhando desempenho. O banco funciona de forma leve, sem precisar de servidor, e oferece o básico em termos de transações e segurança, com dados salvos em um único arquivo .duckdb, o que também facilita backup e recuperação.
 
 ## 💻 Tutorial para uso 
 

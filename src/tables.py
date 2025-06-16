@@ -5,7 +5,132 @@ import duckdb
 import pandas as pd
 
 # Conectando ao banco de dados DuckDB
-con = duckdb.connect(database='/home/parcv/Documentos/comput/faculdade/mc536/MC536/src/database.duckdb', read_only=False)
+con = duckdb.connect(database='/mnt/c/Users/leona/Downloads/MC536-P2-main/MC536-P2-main/src/database.duckdb', read_only=False)
+
+
+consultas = [
+    {
+        "descricao": "1. Escolas com mais de uma fonte de água",
+        "sql": """
+            SELECT 
+                no_entidade,
+                (
+                    CAST(SUM(CAST(in_agua_rede_publica AS INT)) +
+                        SUM(CAST(in_agua_poco_artesiano AS INT)) +
+                        SUM(CAST(in_agua_cacimba AS INT)) +
+                        SUM(CAST(in_agua_fonte_rio AS INT))
+                    AS INT)
+                ) AS fontes_agua
+            FROM escolas
+            GROUP BY no_entidade
+            HAVING fontes_agua > 1
+            ORDER BY fontes_agua DESC;
+        """
+    },
+    {
+        "descricao": "2. Escolas com internet apenas para administrativo",
+        "sql": """
+            SELECT 
+                no_entidade,
+                sg_uf
+            FROM escolas
+            WHERE 
+                in_internet_administrativo = TRUE AND
+                COALESCE(in_internet_alunos, FALSE) = FALSE AND 
+                COALESCE(in_internet_aprendizagem, FALSE) = FALSE;
+        """
+    },
+    {
+        "descricao": "3. Melhores rendimentos no ENEM por escola",
+        "sql": """
+            SELECT 
+                co_entidade,
+                no_entidade,
+                nu_ano_censo AS nu_ano,
+                nu_taxa_participacao,
+                nu_media_tot
+            FROM escolas
+            WHERE nu_media_tot IS NOT NULL
+            ORDER BY nu_media_tot DESC, nu_ano;
+        """
+    },
+    {
+        "descricao": "4. Escolas com água, energia, internet, biblioteca, banheiro e laboratório de informática presentes",
+        "sql": """
+            SELECT 
+                no_entidade,
+                sg_uf
+            FROM escolas
+            WHERE 
+                in_agua_rede_publica = TRUE AND
+                in_energia_rede_publica = TRUE AND
+                in_esgoto_rede_publica = TRUE AND
+                in_internet = TRUE AND
+                in_biblioteca = TRUE AND
+                in_banheiro = TRUE AND
+                in_laboratorio_informatica = TRUE;
+        """
+    },
+    {
+        "descricao": "5. Relação entre rendimento e dependência da escola",
+        "sql": """
+            SELECT 
+                tp_dependencia,
+                COUNT(*) AS qtd_escolas,
+                ROUND(AVG(ensino_medio), 2) AS media_ensino_medio,
+                ROUND(AVG(fundamental), 2) AS media_ensino_fundamental
+            FROM escolas
+            WHERE 
+                ensino_medio IS NOT NULL OR fundamental IS NOT NULL
+            GROUP BY tp_dependencia
+            ORDER BY media_ensino_medio DESC;
+        """
+    },
+    {
+        "descricao": "6. Distribuição de escolas por localização (urbana/rural) e porte",
+        "sql": """
+            SELECT 
+                tp_localizacao,
+                porte_escola,
+                COUNT(*) AS qtd_escolas
+            FROM escolas
+            GROUP BY tp_localizacao, porte_escola
+            ORDER BY tp_localizacao, qtd_escolas DESC;
+        """
+    },
+    {
+        "descricao": "7. Escolas que oferecem internet mas não possuem laboratório de informática",
+        "sql": """
+            SELECT 
+                no_entidade,
+                sg_uf,
+                in_internet,
+                in_laboratorio_informatica
+            FROM escolas
+            WHERE 
+                in_internet = TRUE AND
+                (in_laboratorio_informatica IS FALSE OR in_laboratorio_informatica IS NULL)
+            ORDER BY sg_uf;
+        """
+    },
+    {
+        "descricao": "8. Classificação das escolas por faixa de taxa de participação no ENEM",
+        "sql": """
+            SELECT 
+                CASE 
+                    WHEN nu_taxa_participacao < 20 THEN 'Baixa participação (<20%)'
+                    WHEN nu_taxa_participacao BETWEEN 20 AND 60 THEN 'Média participação (20–60%)'
+                    WHEN nu_taxa_participacao > 60 THEN 'Alta participação (>60%)'
+                ELSE 'Sem dados'
+                END AS faixa_participacao,
+                COUNT(*) AS qtd_escolas
+            FROM escolas
+            GROUP BY faixa_participacao
+            ORDER BY qtd_escolas DESC;
+        """
+    }
+]
+
 
 # Função para criar a tabelas
 
@@ -31,18 +156,27 @@ def create_tables():
     print("Tabelas criadas com sucesso ")
 
 def insert_data():
-    print("Iniciando impoertação de dados...")
-    df_escolas = pd.read_csv('/home/parcv/Documentos/comput/faculdade/mc536/MC536/data/escolas.csv')
+    print("Iniciando importação de dados...")
+    df_escolas = pd.read_csv('/mnt/c/Users/leona/Downloads/MC536-P2-main/MC536-P2-main/dados_escolas/escolas.csv')
     # registrar o dataframe
     con.register('df_escolas', df_escolas)
     con.execute("insert into escolas select * from df_escolas")
     print("Importação de dados concluída")
 
+def run_queries():
+    print("Executando consultas...")
+    for idx, consulta in enumerate(consultas, 1):
+        print(f"\nConsulta {idx}: {consulta['descricao']}")
+        df_resultado = con.execute(consulta["sql"]).fetchdf()
+        print(df_resultado)
+
+
 def main():
     create_tables()
     insert_data()
     result = con.execute("SELECT * FROM escolas LIMIT 5").fetchdf()
-    print(result)
+    print("Dados importados: \n", result)
+    run_queries()
 
 if __name__ == "__main__":
     main()

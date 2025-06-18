@@ -5,7 +5,7 @@ import duckdb
 import pandas as pd
 
 # Conectando ao banco de dados DuckDB
-con = duckdb.connect(database='/mnt/c/Users/leona/Downloads/MC536-P2-main/MC536-P2-main/src/database.duckdb', read_only=False)
+con = duckdb.connect(database='path/to/src/database.duckdb', read_only=False) # botar caminho para o arquivo de banco de dados
 
 
 consultas = [
@@ -157,7 +157,7 @@ def create_tables():
 
 def insert_data():
     print("Iniciando importação de dados...")
-    df_escolas = pd.read_csv('/mnt/c/Users/leona/Downloads/MC536-P2-main/MC536-P2-main/dados_escolas/escolas.csv')
+    df_escolas = pd.read_csv('/path/to/escolas.csv')  # botar caminho para o arquivo csv
     # registrar o dataframe
     con.register('df_escolas', df_escolas)
     con.execute("insert into escolas select * from df_escolas")

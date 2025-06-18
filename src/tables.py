@@ -55,7 +55,7 @@ consultas = [
         """
     },
     {
-        "descricao": "4. Escolas com água, energia, internet, biblioteca, banheiro e laboratório de informática presentes",
+        "descricao": "Escolas com infraestrutura completa (água, energia e esgoto de rede publica com internet, biblioteca, banheiro e laboratório de informática presentes)",
         "sql": """
             SELECT 
                 no_entidade,
@@ -118,8 +118,8 @@ consultas = [
         "sql": """
             SELECT 
                 CASE 
-                    WHEN nu_taxa_participacao < 20 THEN 'Baixa participação (<20%)'
-                    WHEN nu_taxa_participacao BETWEEN 20 AND 60 THEN 'Média participação (20–60%)'
+                    WHEN nu_taxa_participacao < 40 THEN 'Baixa participação (<40%)'
+                    WHEN nu_taxa_participacao BETWEEN 40 AND 60 THEN 'Média participação (40–60%)'
                     WHEN nu_taxa_participacao > 60 THEN 'Alta participação (>60%)'
                 ELSE 'Sem dados'
                 END AS faixa_participacao,
